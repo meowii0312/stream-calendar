@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 Team Stream Calendar Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #8b5cf6;
+            --secondary: #06b6d4;
+            --bg-light: #f8fafc;
+            --bg-dark: #0f172a;
+            --card-light: rgba(255, 255, 255, 0.9);
+            --card-dark: rgba(15, 23, 42, 0.9);
+            --text-light: #1e293b;
+            --text-dark: #f1f5f9;
+            --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-light);
+            transition: all 0.3s ease;
+            min-height: 100vh;
+        }
+
+        .dark {
+            background: var(--bg-dark);
+            color: var(--text-dark);
+        }
+
+        .dark .glass {
+            background: var(--card-dark);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glass {
+            background: var(--card-light);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            padding: 2rem;
+            text-align: center;
+            background: var(--gradient);
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .card {
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid rgba(139, 92, 246, 0.2);
+            border-radius: 12px;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .dark .form-control {
+            background: rgba(15, 23, 42, 0.5);
+            color: var(--text-dark);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: var(--gradient);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--secondary);
+            border: 2px solid var(--secondary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .theme-toggle {
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 0.8rem;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--primary);
+            color: white;
+            transform: rotate(180deg);
+        }
+
+        .stream-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .stream-card {
+            padding: 1.5rem;
+            border-left: 4px solid var(--primary);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .stream-card:hover {
+            transform: translateX(10px);
+        }
+
+        .stream-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .stream-meta {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--primary);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .stream-description {
+            opacity: 0.8;
+            line-height: 1.6;
+        }
+
+        .notification {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: #10b981;
+        }
+
+        .notification.error {
+            background: #ef4444;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 1.5rem;
+            background: var(--gradient);
+            color: white;
+            border-radius: 16px;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .created-by {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .publish-button {
+            background: linear-gradient(45deg, #ef4444, #f97316) !important;
+            color: white !important;
+            position: relative;
+        }
+
+        .publish-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+        }
+
+        .pending-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #fbbf24;
+            color: #000;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎮 Team Stream Calendar Pro</h1>
+        <p>Professionelle Stream-Planung mit Discord-Integration</p>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <!-- Stream erstellen -->
+            <div class="card glass">
+                <h2>📅 <span id="formTitle">Neuer Stream</span></h2>
+                <form id="streamForm">
+                    <div class="form-group">
+                        <label for="streamer">Streamer Name</label>
+                        <input type="text" id="streamer" class="form-control" placeholder="Dein Name..." required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="title">Stream Titel</label>
+                        <input type="text" id="title" class="form-control" placeholder="Mein Stream..." required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="game">Spiel/Kategorie</label>
+                        <input type="text" id="game" class="form-control" placeholder="Valorant, Just Chatting..." required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="platform">Plattform</label>
+                        <select id="platform" class="form-control" required>
+                            <option value="">Wähle Plattform...</option>
+                            <option value="Twitch">🟣 Twitch</option>
+                            <option value="YouTube">🔴 YouTube</option>
+                            <option value="TikTok">⚫ TikTok</option>
+                            <option value="Discord">💜 Discord</option>
+                            <option value="Kick">🟢 Kick</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="datetime">Datum & Zeit</label>
+                        <input type="datetime-local" id="datetime" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="description">Beschreibung (optional)</label>
+                        <textarea id="description" class="form-control" rows="3" placeholder="Was passiert im Stream?"></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        ✨ Stream erstellen
+                    </button>
+                    
+                    <button type="button" id="cancelEditBtn" class="btn btn-secondary" 
+                            style="width: 100%; margin-top: 0.5rem; display: none;"
+                            onclick="calendar.cancelEdit()">
+                        ❌ Abbrechen
+                    </button>
+                </form>
+                
+                <button id="discordTest" class="btn" style="width: 100%; background: #5865f2; color: white; margin-top: 1rem;">
+                    🤖 Discord Test
+                </button>
+            </div>
+
+            <!-- Einstellungen -->
+            <div class="card glass">
+                <h3>⚙️ Einstellungen</h3>
+                <div class="form-group">
+                    <label for="webhookUrl">Discord Webhook URL</label>
+                    <input type="url" id="webhookUrl" class="form-control" 
+                           placeholder="https://discord.com/api/webhooks/..."
+                           value="https://discord.com/api/webhooks/1382788726425653328/Y3lEOVB-eSHfWJzhxHfpVrCTOL_lwgOJ8IcPe0jKAsQKJn8sBKlQkXO0jN1bNx4iRRnj">
+                </div>
+                
+                <div style="display: flex; gap: 1rem;">
+                    <button id="exportBtn" class="btn btn-secondary" style="flex: 1;">
+                        📤 Export
+                    </button>
+                    <button id="importBtn" class="btn btn-secondary" style="flex: 1;">
+                        📥 Import
+                    </button>
+                </div>
+                <input type="file" id="importFile" accept=".json" style="display: none;">
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- Controls -->
+            <div class="controls">
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalStreams">0</div>
+                        <div class="stat-label">Streams</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="upcomingStreams">0</div>
+                        <div class="stat-label">Bevorstehend</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="thisWeek">0</div>
+                        <div class="stat-label">Diese Woche</div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <button id="publishChanges" class="btn publish-button" style="display: none; position: relative;">
+                        📢 Veröffentlichen
+                        <span id="pendingCount" class="pending-count" style="display: none;">0</span>
+                    </button>
+                    
+                    <button id="calendarPreview" class="btn btn-secondary">
+                        📅 Vorschau
+                    </button>
+                    
+                    <button class="theme-toggle" id="themeToggle">
+                        🌙
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stream Liste -->
+            <div class="card glass">
+                <h2>📺 Team Streams</h2>
+                <div id="streamList" class="stream-grid">
+                    <!-- Streams werden hier eingefügt -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification"></div>
+
+    <script>
+        class StreamCalendar {
+            constructor() {
+                this.streams = JSON.parse(localStorage.getItem('streamData')) || [];
+                this.pendingChanges = JSON.parse(localStorage.getItem('pendingChanges')) || [];
+                this.theme = localStorage.getItem('theme') || 'light';
+                this.editingId = null;
+                
+                this.init();
+            }
+
+            init() {
+                // Event Listeners
+                document.getElementById('streamForm').addEventListener('submit', (e) => this.handleSubmit(e));
+                document.getElementById('discordTest').addEventListener('click', () => this.testDiscord());
+                document.getElementById('publishChanges').addEventListener('click', () => this.publishChanges());
+                document.getElementById('calendarPreview').addEventListener('click', () => this.showPreview());
+                document.getElementById('themeToggle').addEventListener('click', () => this.toggleTheme());
+                document.getElementById('exportBtn').addEventListener('click', () => this.exportData());
+                document.getElementById('importBtn').addEventListener('click', () => this.importData());
+                document.getElementById('importFile').addEventListener('change', (e) => this.handleImport(e));
+
+                // Auto-save setup
+                setInterval(() => this.autoSave(), 10000);
+                window.addEventListener('beforeunload', () => this.autoSave());
+
+                // Initial setup
+                this.setTheme(this.theme);
+                this.render();
+                document.getElementById('datetime').min = new Date().toISOString().slice(0, 16);
+            }
+
+            handleSubmit(e) {
+                e.preventDefault();
+                
+                if (this.editingId) {
+                    this.updateStream();
+                } else {
+                    this.createStream();
+                }
+            }
+
+            createStream() {
+                const stream = {
+                    id: Date.now(),
+                    streamer: document.getElementById('streamer').value,
+                    title: document.getElementById('title').value,
+                    game: document.getElementById('game').value,
+                    platform: document.getElementById('platform').value,
+                    datetime: document.getElementById('datetime').value,
+                    description: document.getElementById('description').value,
+                    created: new Date().toISOString()
+                };
+
+                this.streams.push(stream);
+                this.addPendingChange('created', stream);
+                this.autoSave();
+                this.render();
+                
+                document.getElementById('streamForm').reset();
+                this.showNotification(`Stream "${stream.title}" erstellt! 🎉`, 'success');
+            }
+
+            editStream(id) {
+                const stream = this.streams.find(s => s.id === id);
+                if (!stream) return;
+
+                this.editingId = id;
+                
+                // Form füllen
+                document.getElementById('streamer').value = stream.streamer;
+                document.getElementById('title').value = stream.title;
+                document.getElementById('game').value = stream.game;
+                document.getElementById('platform').value = stream.platform;
+                document.getElementById('datetime').value = stream.datetime;
+                document.getElementById('description').value = stream.description || '';
+                
+                // UI anpassen
+                document.getElementById('formTitle').textContent = 'Stream bearbeiten';
+                document.getElementById('cancelEditBtn').style.display = 'block';
+                document.querySelector('#streamForm button[type="submit"]').innerHTML = '💾 Aktualisieren';
+                
+                document.querySelector('.sidebar').scrollIntoView({ behavior: 'smooth' });
+                this.showNotification(`Bearbeite: ${stream.title}`, 'success');
+            }
+
+            updateStream() {
+                const stream = this.streams.find(s => s.id === this.editingId);
+                if (!stream) return;
+
+                const oldStream = { ...stream };
+                
+                stream.streamer = document.getElementById('streamer').value;
+                stream.title = document.getElementById('title').value;
+                stream.game = document.getElementById('game').value;
+                stream.platform = document.getElementById('platform').value;
+                stream.datetime = document.getElementById('datetime').value;
+                stream.description = document.getElementById('description').value;
+                stream.updated = new Date().toISOString();
+
+                this.addPendingChange('updated', stream, oldStream);
+                this.cancelEdit();
+                this.autoSave();
+                this.render();
+                
+                this.showNotification(`Stream "${stream.title}" aktualisiert! 💾`, 'success');
+            }
+
+            cancelEdit() {
+                this.editingId = null;
+                document.getElementById('streamForm').reset();
+                document.getElementById('formTitle').textContent = 'Neuer Stream';
+                document.getElementById('cancelEditBtn').style.display = 'none';
+                document.querySelector('#streamForm button[type="submit"]').innerHTML = '✨ Stream erstellen';
+            }
+
+            deleteStream(id) {
+                if (confirm('Stream wirklich löschen?')) {
+                    const stream = this.streams.find(s => s.id === id);
+                    this.streams = this.streams.filter(s => s.id !== id);
+                    
+                    if (this.editingId === id) {
+                        this.cancelEdit();
+                    }
+                    
+                    this.addPendingChange('deleted', stream);
+                    this.autoSave();
+                    this.render();
+                    
+                    this.showNotification('Stream gelöscht! 🗑️', 'success');
+                }
+            }
+
+            addPendingChange(action, stream, oldStream = null) {
+                this.pendingChanges.push({
+                    id: Date.now(),
+                    action,
+                    stream: { ...stream },
+                    oldStream: oldStream ? { ...oldStream } : null,
+                    timestamp: new Date().toISOString()
+                });
+                
+                this.updatePendingIndicator();
+                localStorage.setItem('pendingChanges', JSON.stringify(this.pendingChanges));
+            }
+
+            updatePendingIndicator() {
+                const btn = document.getElementById('publishChanges');
+                const count = document.getElementById('pendingCount');
+                
+                if (this.pendingChanges.length > 0) {
+                    btn.style.display = 'block';
+                    count.style.display = 'flex';
+                    count.textContent = this.pendingChanges.length;
+                } else {
+                    btn.style.display = 'none';
+                    count.style.display = 'none';
+                }
+            }
+
+            async publishChanges() {
+                if (this.pendingChanges.length === 0) return;
+
+                const webhookUrl = document.getElementById('webhookUrl').value;
+                if (!webhookUrl) {
+                    this.showNotification('Discord Webhook URL fehlt!', 'error');
+                    return;
+                }
+
+                try {
+                    const summary = this.createChangesSummary();
+                    const calendarText = this.generateCalendarText();
+                    
+                    const embed = {
+                        embeds: [{
+                            title: "📅 Stream Calendar Update",
+                            description: `**${this.pendingChanges.length} Änderung(en):**\n${summary}`,
+                            color: 9520895,
+                            fields: [{
+                                name: "📅 Aktuelle Streams",
+                                value: calendarText || "Keine bevorstehenden Streams",
+                                inline: false
+                            }],
+                            footer: {
+                                text: `Update • ${new Date().toLocaleString('de-DE')}`
+                            },
+                            timestamp: new Date().toISOString()
+                        }]
+                    };
+
+                    const response = await fetch(webhookUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(embed)
+                    });
+
+                    if (response.ok) {
+                        this.pendingChanges = [];
+                        localStorage.setItem('pendingChanges', JSON.stringify(this.pendingChanges));
+                        this.updatePendingIndicator();
+                        this.showNotification('Änderungen erfolgreich veröffentlicht! 📢', 'success');
+                    } else {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                } catch (error) {
+                    this.showNotification('Discord-Fehler: ' + error.message, 'error');
+                }
+            }
+
+            createChangesSummary() {
+                const counts = {
+                    created: this.pendingChanges.filter(c => c.action === 'created').length,
+                    updated: this.pendingChanges.filter(c => c.action === 'updated').length,
+                    deleted: this.pendingChanges.filter(c => c.action === 'deleted').length
+                };
+
+                const parts = [];
+                if (counts.created > 0) parts.push(`✨ ${counts.created} neue`);
+                if (counts.updated > 0) parts.push(`✏️ ${counts.updated} bearbeitet`);
+                if (counts.deleted > 0) parts.push(`🗑️ ${counts.deleted} gelöscht`);
+
+                return parts.join(', ');
+            }
+
+            generateCalendarText() {
+                const upcoming = this.streams
+                    .filter(s => new Date(s.datetime) > new Date())
+                    .sort((a, b) => new Date(a.datetime) - new Date(b.datetime))
+                    .slice(0, 5);
+
+                if (upcoming.length === 0) return "Keine bevorstehenden Streams";
+
+                return upcoming.map((stream, i) => {
+                    const date = new Date(stream.datetime).toLocaleString('de-DE', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    return `${i + 1}. **${stream.title}** (${stream.streamer}) - ${date}`;
+                }).join('\n');
+            }
+
+            showPreview() {
+                const calendarText = this.generateCalendarText();
+                alert(`📅 Kalender-Vorschau:\n\n${calendarText}`);
+            }
+
+            async testDiscord() {
+                const webhookUrl = document.getElementById('webhookUrl').value;
+                if (!webhookUrl) {
+                    this.showNotification('Discord Webhook URL fehlt!', 'error');
+                    return;
+                }
+
+                try {
+                    const embed = {
+                        embeds: [{
+                            title: "🧪 Discord Test",
+                            description: "Stream Calendar ist erfolgreich verbunden!",
+                            color: 3447003,
+                            timestamp: new Date().toISOString()
+                        }]
+                    };
+
+                    const response = await fetch(webhookUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(embed)
+                    });
+
+                    if (response.ok) {
+                        this.showNotification('Discord-Test erfolgreich! 🤖', 'success');
+                    } else {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                } catch (error) {
+                    this.showNotification('Discord-Test fehlgeschlagen: ' + error.message, 'error');
+                }
+            }
+
+            render() {
+                this.renderStreams();
+                this.updateStats();
+                this.updatePendingIndicator();
+            }
+
+            renderStreams() {
+                const container = document.getElementById('streamList');
+                
+                if (this.streams.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 4rem; opacity: 0.6;">
+                            <h3>Noch keine Streams</h3>
+                            <p>Erstelle deinen ersten Stream!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const sorted = [...this.streams].sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+                
+                container.innerHTML = sorted.map(stream => {
+                    const date = new Date(stream.datetime);
+                    const isUpcoming = date > new Date();
+                    const dateStr = date.toLocaleString('de-DE', {
+                        weekday: 'short',
+                        day: '2-digit',
+                        month: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+
+                    const isPending = this.pendingChanges.some(c => c.stream.id === stream.id);
+
+                    return `
+                        <div class="stream-card glass">
+                            <div class="created-by">👤 ${stream.streamer}</div>
+                            ${isPending ? '<div style="position: absolute; top: 1rem; right: 8rem; background: #ef4444; color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.7rem;">📝 Unveröffentlicht</div>' : ''}
+                            
+                            <div class="stream-title">${stream.title}</div>
+                            <div class="stream-meta">
+                                <span class="meta-item">🎲 ${stream.game}</span>
+                                <span class="meta-item">📱 ${stream.platform}</span>
+                                <span class="meta-item">🕐 ${dateStr}</span>
+                                ${isUpcoming ? '<span class="meta-item" style="background: #10b981; color: white;">✨ Bevorstehend</span>' : ''}
+                            </div>
+                            ${stream.description ? `<div class="stream-description">${stream.description}</div>` : ''}
+                            
+                            <div style="position: absolute; top: 1rem; right: 1rem; display: flex; gap: 0.5rem;">
+                                <button onclick="calendar.editStream(${stream.id})" 
+                                        style="background: #3b82f6; color: white; border: none; border-radius: 6px; padding: 0.3rem 0.6rem; cursor: pointer; font-size: 0.8rem;">
+                                    ✏️
+                                </button>
+                                <button onclick="calendar.deleteStream(${stream.id})" 
+                                        style="background: #ef4444; color: white; border: none; border-radius: 6px; padding: 0.3rem 0.6rem; cursor: pointer; font-size: 0.8rem;">
+                                    🗑️
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            updateStats() {
+                const now = new Date();
+                const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+                
+                const upcoming = this.streams.filter(s => new Date(s.datetime) > now).length;
+                const thisWeek = this.streams.filter(s => {
+                    const streamDate = new Date(s.datetime);
+                    return streamDate > now && streamDate < weekFromNow;
+                }).length;
+
+                document.getElementById('totalStreams').textContent = this.streams.length;
+                document.getElementById('upcomingStreams').textContent = upcoming;
+                document.getElementById('thisWeek').textContent = thisWeek;
+            }
+
+            toggleTheme() {
+                this.theme = this.theme === 'light' ? 'dark' : 'light';
+                this.setTheme(this.theme);
+                localStorage.setItem('theme', this.theme);
+            }
+
+            setTheme(theme) {
+                document.body.classList.toggle('dark', theme === 'dark');
+                document.getElementById('themeToggle').textContent = theme === 'dark' ? '☀️' : '🌙';
+            }
+
+            autoSave() {
+                localStorage.setItem('streamData', JSON.stringify(this.streams));
+                
+                // Visual feedback
+                const indicator = document.createElement('div');
+                indicator.innerHTML = '💾 Gespeichert';
+                indicator.style.cssText = `
+                    position: fixed; top: 1rem; left: 50%; transform: translateX(-50%);
+                    background: #10b981; color: white; padding: 0.5rem 1rem;
+                    border-radius: 20px; font-size: 0.8rem; z-index: 1000;
+                    opacity: 0; transition: opacity 0.3s ease;
+                `;
+                document.body.appendChild(indicator);
+                
+                setTimeout(() => indicator.style.opacity = '1', 10);
+                setTimeout(() => {
+                    indicator.style.opacity = '0';
+                    setTimeout(() => document.body.removeChild(indicator), 300);
+                }, 1500);
+            }
+
+            exportData() {
+                const data = {
+                    streams: this.streams,
+                    pendingChanges: this.pendingChanges,
+                    webhookUrl: document.getElementById('webhookUrl').value,
+                    exported: new Date().toISOString()
+                };
+                
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `stream-calendar-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                this.showNotification('Daten exportiert! 📤', 'success');
+            }
+
+            importData() {
+                document.getElementById('importFile').click();
+            }
+
+            handleImport(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        
+                        if (data.streams) {
+                            this.streams = data.streams;
+                            this.autoSave();
+                            this.render();
+                        }
+                        
+                        if (data.pendingChanges) {
+                            this.pendingChanges = data.pendingChanges;
+                            localStorage.setItem('pendingChanges', JSON.stringify(this.pendingChanges));
+                        }
+                        
+                        if (data.webhookUrl) {
+                            document.getElementById('webhookUrl').value = data.webhookUrl;
+                        }
+                        
+                        this.showNotification('Daten importiert! 📥', 'success');
+                    } catch (error) {
+                        this.showNotification('Import-Fehler: Ungültige Datei', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            }
+
+            showNotification(message, type) {
+                const notification = document.getElementById('notification');
+                notification.textContent = message;
+                notification.className = `notification ${type}`;
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+        }
+
+        // App initialisieren
+        const calendar = new StreamCalendar();
+    </script>
+</body>
+</html>
